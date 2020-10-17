@@ -47,7 +47,9 @@ class Filters extends React.Component {
         LocalizationStore.on('clientUpdateLanguageChange', this.onClientUpdateLanguageChange);
 
         this.setSelection();
-        this.state.filters[0] && this.state.filters[0].id && this.handleFilterClick(null, this.state.filters[0].id); // Select first folder
+        setTimeout(() => {
+            this.state.filters && this.state.filters[0] && this.state.filters[0].id && this.handleFilterClick(null, this.state.filters[0].id); // Select first folder
+        }, 300)
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
