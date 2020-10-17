@@ -47,6 +47,7 @@ class Filters extends React.Component {
         LocalizationStore.on('clientUpdateLanguageChange', this.onClientUpdateLanguageChange);
 
         this.setSelection();
+        this.state.filters[0]?.id && this.handleFilterClick(null, this.state.filters[0]?.id); // Select first folder
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -245,13 +246,6 @@ class Filters extends React.Component {
         this.filterRef = new Map();
         return (
             <div ref={this.filtersRef} className='filters' onWheel={this.handleWheel}>
-                <div
-                    ref={r => this.filterRef.set('chatListMain', r)}
-                    className={classNames('filter', { 'item-selected': chatList['@type'] === 'chatListMain'})}
-                    onMouseDown={this.handleMainClick}
-                    title={isSmallWidth ? t('FilterAllChats') : null}>
-                    <span>{isSmallWidth ? getFirstLetter(t('FilterAllChats')) : t('FilterAllChats')}</span>
-                </div>
                 {filters.map(x => (
                     <div
                         key={x.id}
@@ -261,6 +255,13 @@ class Filters extends React.Component {
                         title={isSmallWidth ? x.title : null}>
                         <span>{isSmallWidth ? getFirstLetter(x.title) : x.title}</span>
                     </div>))}
+                    <div
+                        ref={r => this.filterRef.set('chatListMain', r)}
+                        className={classNames('filter', { 'item-selected': chatList['@type'] === 'chatListMain'})}
+                        onMouseDown={this.handleMainClick}
+                        title={isSmallWidth ? t('FilterAllChats') : null}>
+                        <span>{isSmallWidth ? getFirstLetter(t('FilterAllChats')) : t('FilterAllChats')}</span>
+                    </div>
                 <div ref={this.filterSelectionRef} className='filter-selection'/>
             </div>
         );
