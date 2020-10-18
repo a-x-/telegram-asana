@@ -22,6 +22,7 @@ import SettingsMenuButton from './SettingsMenuButton';
 import UnmuteIcon from '../../../Assets/Icons/Unmute';
 import DataIcon from '../../../Assets/Icons/Data';
 import LanguageIcon from '../../../Assets/Icons/Language';
+import TaskTrackerIcon from '@material-ui/icons/Assignment';
 import packageJson from '../../../../package.json';
 import { setProfileMediaViewerContent } from '../../../Actions/Client';
 import ChatStore from '../../../Stores/ChatStore';
@@ -31,7 +32,7 @@ class Main extends React.Component {
 
     handleOpenViewer = () => {
         const { chatId } = this.props;
-        
+
         const chat = ChatStore.get(chatId);
         if (!chat) return;
         if (!chat.photo) return;
@@ -50,6 +51,7 @@ class Main extends React.Component {
             onNotifications,
             onPrivacySecurity,
             onLanguage,
+            onTaskTracker,
             onFilters
         } = this.props;
         const chat = ChatStore.get(chatId);
@@ -113,6 +115,12 @@ class Main extends React.Component {
                             <LanguageIcon />
                         </ListItemIcon>
                         <ListItemText primary={t('Language')} />
+                    </ListItem>
+                    <ListItem autoFocus={false} className='settings-list-item' button onClick={onTaskTracker}>
+                        <ListItemIcon>
+                            <TaskTrackerIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={t('TaskTracker')} />
                     </ListItem>
                     <div className='settings-main-footer'>
                         {packageJson.version}

@@ -14,6 +14,7 @@ import EditProfile from './EditProfile';
 import Filters from './Filters';
 import General from './General';
 import Language from '../Language';
+import TaskTracker from '../TaskTracker';
 import Notifications from './Notifications';
 import PrivacySecurity from './PrivacySecurity';
 import SidebarPage from '../SidebarPage';
@@ -34,7 +35,8 @@ class Settings extends React.Component {
             openNotifications: false,
             openPrivacySecurity: false,
             openLanguage: false,
-            openFilters: false
+            openFilters: false,
+            openTasktracker: false,
         };
     }
 
@@ -74,77 +76,18 @@ class Settings extends React.Component {
         UserStore.setFullInfo(UserStore.getMyId(), result);
     }
 
-    openEditProfile = () => {
-        this.setState({
-            openEditProfile: true
-        });
-    };
-
-    closeEditProfile = () => {
-        this.setState({
-            openEditProfile: false
-        });
-    };
-
-    openGeneral = () => {
-        this.setState({
-            openGeneral: true
-        });
-    };
-
-    closeGeneral = () => {
-        this.setState({
-            openGeneral: false
-        });
-    };
-
-    openNotifications = () => {
-        this.setState({
-            openNotifications: true
-        });
-    };
-
-    closeNotifications = () => {
-        this.setState({
-            openNotifications: false
-        });
-    };
-
-    openPrivacySecurity = () => {
-        this.setState({
-            openPrivacySecurity: true
-        });
-    };
-
-    closePrivacySecurity = () => {
-        this.setState({
-            openPrivacySecurity: false
-        });
-    };
-
-    openLanguage = () => {
-        this.setState({
-            openLanguage: true
-        });
-    };
-
-    closeLanguage = () => {
-        this.setState({
-            openLanguage: false
-        });
-    };
-
-    openFilters = () => {
-        this.setState({
-            openFilters: true
-        });
-    };
-
-    closeFilters = () => {
-        this.setState({
-            openFilters: false
-        });
-    };
+    openEditProfile = () => this.setState({ openEditProfile: true });
+    closeEditProfile = () => this.setState({ openEditProfile: false });
+    openGeneral = () => this.setState({ openGeneral: true });
+    closeGeneral = () => this.setState({ openGeneral: false });
+    openNotifications = () => this.setState({ openNotifications: true });
+    closeNotifications = () => this.setState({ openNotifications: false });
+    openPrivacySecurity = () => this.setState({ openPrivacySecurity: true });
+    closePrivacySecurity = () => this.setState({ openPrivacySecurity: false });
+    openLanguage = () => this.setState({ openLanguage: true });
+    closeLanguage = () => this.setState({ openLanguage: false });
+    openFilters = () => this.setState({ openFilters: true })
+    closeFilters = () => this.setState({ openFilters: false });
 
     handleCloseSettings = () => {
         TdLibController.clientUpdate({
@@ -169,6 +112,7 @@ class Settings extends React.Component {
                     onPrivacySecurity={this.openPrivacySecurity}
                     onLanguage={this.openLanguage}
                     onFilters={this.openFilters}
+                    onTaskTracker={() => this.setState({ openTasktracker: true })}
                 />
                 <SidebarPage open={openEditProfile} onClose={this.closeEditProfile}>
                     <EditProfile chatId={chatId} />
@@ -187,6 +131,9 @@ class Settings extends React.Component {
                 </SidebarPage>
                 <SidebarPage open={openLanguage} onClose={this.closeLanguage}>
                     <Language />
+                </SidebarPage>
+                <SidebarPage open={this.state.openTasktracker} onClose={() => this.setState({ openTasktracker: false })}>
+                    <TaskTracker />
                 </SidebarPage>
             </>
         );

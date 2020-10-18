@@ -47,6 +47,7 @@ import FileStore from '../../Stores/FileStore';
 import OptionStore from '../../Stores/OptionStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import UserStore from '../../Stores/UserStore';
+import TasksStore from '../../Stores/TaskTrackerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MoreListItem.css';
 import './ChatDetails.css';
@@ -63,11 +64,12 @@ class ChatDetails extends React.Component {
         this.mediaRef = React.createRef();
 
         const { chatId } = this.props;
+        const tasksStore = chatId && TasksStore.chats && TasksStore.chats[chatId] && TasksStore.chats[chatId].tasksStore
 
         this.members = new Map();
         this.state = {
             prevChatId: chatId,
-            headerTab: 'tasks',
+            headerTab: tasksStore ? 'tasks' : 'info',
             newTaskFormOpen: false,
         };
     }
@@ -118,14 +120,17 @@ class ChatDetails extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { chatId } = this.props;
-        if (prevProps.chatId !== chatId) {
-            this.loadContent();
-        }
+        if (prevProps.chatId !== chatId) this.loadContent();
 
         const { current: list } = this.listRef;
         const { scrollTop, scrollHeight, offsetHeight } = snapshot;
-        if (!list) return
-        list.scrollTop = prevProps.chatId === chatId ? scrollTop : 0;
+        if (list) list.scrollTop = prevProps.chatId === chatId ? scrollTop : 0;
+
+        if (prevProps.chatId !== this.props.chatId) {
+            const { chatId } = this.props;
+            const tasksStore = chatId && TasksStore.chats && TasksStore.chats[chatId] && TasksStore.chats[chatId].tasksStore
+            this.setState({headerTab: tasksStore ? 'tasks' : 'info'});
+        }
     }
 
     componentDidMount() {

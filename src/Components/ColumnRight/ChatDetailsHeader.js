@@ -8,6 +8,7 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
+import TasksStore from '../../Stores/TaskTrackerStore';
 import ArrowBackIcon from '../../Assets/Icons/Back';
 import CloseIcon from '../../Assets/Icons/Close';
 import { isChannelChat, isPrivateChat } from '../../Utils/Chat';
@@ -22,10 +23,11 @@ const HeadTab = withStyles({ root: { minWidth: 0, color: 'grey' }, selected: { c
 class ChatDetailsHeader extends React.Component {
     render() {
         const { chatId, t, backButton, onBackClick, onClose, onTabChange } = this.props;
+        const tasksStore = chatId && TasksStore.chats && TasksStore.chats[chatId] && TasksStore.chats[chatId].tasksStore
 
         let info = t('ChatInfo');
         if (isPrivateChat(chatId)) {
-            info = t('Info');
+            info = t('Person Info');
         } else if (isChannelChat(chatId)) {
             info = t('ChannelInfo');
         }
@@ -44,10 +46,12 @@ class ChatDetailsHeader extends React.Component {
                             value={ HEADER_TABS.findIndex(t => t === this.props.tab) }
                             onChange={ (_, value) => onTabChange(HEADER_TABS[value]) }
                         >
-                            <HeadTab label="info" className="chat-header-text">{info}</HeadTab>
-                            <HeadTab label="tasks">Tasks</HeadTab>
-                            <HeadTab label="webs" disabled>Webs</HeadTab>
-                            <HeadTab label="files" disabled>Files</HeadTab>
+                            <HeadTab label={info} className="chat-header-text"/>
+                            { tasksStore && [
+                                <HeadTab key="tasks" label="Tasks"/>,
+                                <HeadTab key="webs" label="Webs" disabled/>,
+                                <HeadTab key="files" label="Files" disabled/>,
+                            ]}
                         </HeadTabs>
                     </span>
                 </div>

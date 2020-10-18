@@ -1,26 +1,16 @@
 import EventEmitter from './EventEmitter';
 
-const ORG1_CHAT_ID = 203483732;
-const ORG1_PRJ_ID = '1144484093750372';
 export const TT = {
   ASANA: 'ASANA',
 }
+const taskTrackerSettings = localStorage.taskTrackerSettings && JSON.parse(localStorage.taskTrackerSettings)
 export const initialTasks = []
-export const initialProjects = {
-  ORG1_PRJ_ID: {},
-}
-export const initialChats = {
-  [ORG1_CHAT_ID]: {
-    tasksStore: {
-      projectId: ORG1_PRJ_ID,
-      taskTracker: TT.ASANA
-    },
-  },
-}
+export const initialProjects = []
+export const initialChats = parseMapping(taskTrackerSettings.mappingText)
 const asanaHeaders = new Headers({
   'Accept': 'application/json',
   'Content-Type': 'application/json',
-  'Authorization': `Bearer ${process.env.REACT_APP_ASANA_TOKEN}`,
+  'Authorization': `Bearer ${taskTrackerSettings && taskTrackerSettings.pat || 'OPEN TELEGRAM SETTINS > TaskTracker'}`,
 })
 
 
@@ -61,6 +51,20 @@ class TaskTrackerStore extends EventEmitter {
     const res = await fetch('https://app.asana.com/api/1.0/tasks', params).then(res => res.json());
     if (res.errors) throw new Error(res.errors[0] && res.errors[0].message || 'Error');
   }
+}
+
+function parseMapping (mappingText) {
+  const res = {};
+  normMapping(mappingText).trim().replace(/\s*\(.+?\)/g, '').split('\n').forEach(line => {
+    const [chatId, projectId] = line.trim().split(' ')
+    res[chatId] = {tasksStore: {projectId}};
+  })
+  return res;
+}
+
+
+export function normMapping (mappingText) {
+  return mappingText.trimLeft().replace(/\n{2,}/g, '\n').replace(/ +/g, ' ');
 }
 
 const store = new TaskTrackerStore();
