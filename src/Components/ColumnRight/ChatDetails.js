@@ -64,13 +64,14 @@ class ChatDetails extends React.Component {
         this.mediaRef = React.createRef();
 
         const { chatId } = this.props;
-        const tasksStore = chatId && TasksStore.chats && TasksStore.chats[chatId] && TasksStore.chats[chatId].tasksStore
+        const tasksStore = this.getTasksStore()
+        const projectId = tasksStore && tasksStore.projectId
 
         this.members = new Map();
         this.state = {
             prevChatId: chatId,
             headerTab: tasksStore ? 'tasks' : 'info',
-            newTaskFormOpen: false,
+            newTaskFormOpen: Boolean(localStorage[`taskTrackerIncomplete_${projectId}`]),
         };
     }
 
@@ -127,9 +128,12 @@ class ChatDetails extends React.Component {
         if (list) list.scrollTop = prevProps.chatId === chatId ? scrollTop : 0;
 
         if (prevProps.chatId !== this.props.chatId) {
-            const { chatId } = this.props;
-            const tasksStore = chatId && TasksStore.chats && TasksStore.chats[chatId] && TasksStore.chats[chatId].tasksStore
-            this.setState({headerTab: tasksStore ? 'tasks' : 'info'});
+            const tasksStore = this.getTasksStore()
+            const projectId = tasksStore && tasksStore.projectId
+            this.setState({
+                headerTab: tasksStore ? 'tasks' : 'info',
+                newTaskFormOpen: Boolean(localStorage[`taskTrackerIncomplete_${projectId}`]),
+            });
         }
     }
 
@@ -299,6 +303,11 @@ class ChatDetails extends React.Component {
 
         return this.listRef.current.clientHeight;
     };
+
+    getTasksStore () {
+        const { chatId } = this.props;
+        return chatId && TasksStore.chats && TasksStore.chats[chatId] && TasksStore.chats[chatId].tasksStore
+    }
 
     handleTabClick = event => {
         const { current: list } = this.listRef;

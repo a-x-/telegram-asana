@@ -143,6 +143,7 @@ export default function NewTask ({ chatId, onClose }) {
       await TasksStore.submitTask(projectId, {...fields, due_on, parent: superTask && superTask.id})
       setFields(initialTask)
       setSubmitStatus(null)
+      setTimeout(() => delete localStorage[`taskTrackerIncomplete_${projectId}`])
     } catch(e) {
       setSubmitStatus(e)
     }
