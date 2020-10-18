@@ -7,7 +7,7 @@ export const TT = {
 const taskTrackerSettings = localStorage.taskTrackerSettings && JSON.parse(localStorage.taskTrackerSettings)
 export const initialTasks = []
 export const initialProjects = []
-export const initialChats = parseMapping(taskTrackerSettings.mappingText)
+export const initialChats = taskTrackerSettings ? parseMapping(taskTrackerSettings.mappingText) : {}
 const asanaHeaders = new Headers({
   'Accept': 'application/json',
   'Content-Type': 'application/json',
