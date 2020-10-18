@@ -13,3 +13,7 @@
     padding: 11px 22px;
     border-radius: 8px;
 }
+.list-item-compact {
+    padding: 2px 22px;
+    font-size: 12px;
+}

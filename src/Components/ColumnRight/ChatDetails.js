@@ -71,7 +71,7 @@ class ChatDetails extends React.Component {
         this.state = {
             prevChatId: chatId,
             headerTab: tasksStore ? 'tasks' : 'info',
-            newTaskFormOpen: Boolean(localStorage[`taskTrackerIncomplete_${projectId}`]),
+            newTaskFormOpen: Boolean(localStorage[`taskTrackerIncomplete_${projectId}`]) && Object.values(JSON.parse(localStorage[`taskTrackerIncomplete_${projectId}`])).some(Boolean),
         };
     }
 
@@ -132,7 +132,7 @@ class ChatDetails extends React.Component {
             const projectId = tasksStore && tasksStore.projectId
             this.setState({
                 headerTab: tasksStore ? 'tasks' : 'info',
-                newTaskFormOpen: Boolean(localStorage[`taskTrackerIncomplete_${projectId}`]),
+                newTaskFormOpen: Boolean(localStorage[`taskTrackerIncomplete_${projectId}`]) && Object.values(JSON.parse(localStorage[`taskTrackerIncomplete_${projectId}`])).some(Boolean),
             });
         }
     }
@@ -458,7 +458,7 @@ class ChatDetails extends React.Component {
                     onBackClick={this.handleHeaderClick}
                     tab={this.state.headerTab} onTabChange={(tab) => this.setState({ headerTab: tab })} />
                 {this.state.headerTab === 'info' && this.renderInfo(chatId, popup, photo, isMe, bio, t, username, phoneNumber, isGroup)}
-                {this.state.headerTab === 'tasks' && <TasksList onNewTaskToggle={() => this.setState(({newTaskFormOpen}) => ({ newTaskFormOpen: !newTaskFormOpen}))} />}
+                {this.state.headerTab === 'tasks' && <TasksList chatId={chatId} onNewTaskToggle={() => this.setState(({newTaskFormOpen}) => ({ newTaskFormOpen: !newTaskFormOpen}))} />}
             </>
         );
     }

@@ -13,7 +13,7 @@ const asanaHeaders = new Headers({
   'Content-Type': 'application/json',
   'Authorization': `Bearer ${taskTrackerSettings && taskTrackerSettings.pat || 'OPEN TELEGRAM SETTINS > TaskTracker'}`,
 })
-const getTaskPlaces = getTaskPlaceScript(taskTrackerSettings)
+const _getTaskPlaces = getTaskPlaceScript(taskTrackerSettings)
 
 
 class TaskTrackerStore extends EventEmitter {
@@ -24,7 +24,6 @@ class TaskTrackerStore extends EventEmitter {
         this.loadProjects();
         this.loadUsers();
       }, 1000); // low priority
-    this.getTasks = memoize(this._getTasks);
   }
   reset() {
     this.projects = initialProjects;
@@ -41,7 +40,11 @@ class TaskTrackerStore extends EventEmitter {
     this.users = users.map((item) => ({...item, id: item.gid}));
     // todo: error,loading
   }
-  async _getTasks(projectId) {
+
+  //
+  // == Public
+
+  getTasks = async (projectId) => {
     if (!projectId) {
       console.error('getTasks: projectId is unset')
       return []
@@ -50,10 +53,6 @@ class TaskTrackerStore extends EventEmitter {
     return tasks.map((item) => ({...item, id: item.gid}));
     // todo: error,loading
   }
-
-  //
-  // == Public
-
   /**
    * @param projectId {number}
    * @param data {object}
@@ -62,11 +61,24 @@ class TaskTrackerStore extends EventEmitter {
     const params = { method: 'POST', headers: asanaHeaders, body: JSON.stringify({data: {...data, projects: [projectId]}}) };
     const res = await fetch('https://app.asana.com/api/1.0/tasks', params).then(res => res.json());
     if (res.errors) throw new Error(res.errors[0] && res.errors[0].message || 'Error');
+    this.emit('taskCreated', res)
   }
 
-  getTaskPlaces = async (projectId) => {
-    const tasks = await this.getTasks(projectId)
-    return getTaskPlaces({ tasks })
+  getTaskPlaces = ({tasks}) => _getTaskPlaces({tasks})
+
+  getFullTasks = async (projectId) => {
+    const tasks = await this.getTasks(projectId);
+    const fields = ['notes', 'name', 'permalink_url', 'gid', 'assignee', 'completed', 'section'].join(',');
+    const fullTasks = await Promise.all(tasks.map(t => fetch(`https://app.asana.com/api/1.0/tasks/${ t.id }?opt_fields=${fields}`, { headers: asanaHeaders }).then(res => res.json())))
+    return fullTasks.map(({data: item}) => ({...item, id: item.gid}));
+    // todo: error,loading
+  }
+
+  getSections = async (projectId) => {
+    const {data: tasks} = await fetch(`https://app.asana.com/api/1.0/tasks?project=${projectId}`, { headers: asanaHeaders }).then(r => r.json())
+    return tasks.map((item) => ({...item, id: item.gid}));
+    // todo: error,loading
+
   }
 }
 
@@ -85,7 +97,12 @@ export function normMapping (mappingText) {
 }
 
 function getTaskPlaceScript (settings) {
-  const result = settings && settings.placeScript && eval(settings.placeScript)
+  let result = []
+  try {
+    result = settings && settings.placeScript && eval(settings.placeScript)
+  } catch (e) {
+    console.error('Task Place Compute Script отработал с ошибкой')
+  }
   if (typeof result === 'function') return result;
   if (Array.isArray(result)) return () => result;
   return undefined;

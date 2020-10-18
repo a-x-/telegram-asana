@@ -101,7 +101,7 @@ export default function TaskTracker ({ onClose }) {
                 </Box>
                 <Box p={2}>
                     <TextField variant="outlined" multiline rows={ 16 } fullWidth
-                        label="Task Place Compute Script"
+                        label={t('Task Place Compute Script')}
                         style={{marginTop: 16 }}
                         inputProps={{style:{ whiteSpace: 'nowrap' }}}
                         inputRef={placeScriptRef}

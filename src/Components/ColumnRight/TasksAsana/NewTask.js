@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
-import TasksStore from '../../../Stores/TaskTrackerStore';
+import TaskTrackerStore from '../../../Stores/TaskTrackerStore';
 
 import { FormControl, IconButton, TextField, Box, Button, MenuItem, Chip, CircularProgress, Typography, Link } from "@material-ui/core";
 import ArrowBackIcon from '../../../Assets/Icons/Back';
@@ -25,7 +25,7 @@ const titles = {
 }
 
 export default function NewTask ({ chatId, onClose }) {
-    const [{ projects, chats, users: _users, getTaskPlaces, getTasks }] = useState(TasksStore);
+    const [{ projects, chats, users: _users, getTaskPlaces, getTasks }] = useState(TaskTrackerStore);
     const projectId = chats && chatId && chats[chatId] && chats[chatId].tasksStore.projectId
     const [submitStatus, setSubmitStatus] = useState(null);
     const users = useMemo(() => [{id:'me', name: 'Me'}, ..._users], [_users]);
@@ -41,8 +41,15 @@ export default function NewTask ({ chatId, onClose }) {
       localStorage[`taskTrackerIncomplete_${projectId}`] = JSON.stringify(fields)
     }),600), [])
 
-    useEffect(() => void (projectId && getTasks(projectId).then(setTasks)), [projectId]);
-    useEffect(() => void (projectId && getTaskPlaces(projectId).then(setTaskPlaces)), [projectId]);
+    useEffect(() => {
+      if (!projectId) return
+      getTasks(projectId).then(tasks => {
+        setTasks(tasks)
+        const places = getTaskPlaces({tasks})
+        if (Array.isArray(places)) setTaskPlaces(places)
+        else alert(`${t('Task Place Compute Script')} must return array`)
+      })
+    }, [projectId]);
     useEffect(() => void persistFields(fields), [fields])
 
     if (!chats || !chats[chatId] || !chats[chatId].tasksStore) return null
@@ -140,7 +147,7 @@ export default function NewTask ({ chatId, onClose }) {
     const due_on = fields.due_on && formatISO(fields.due_on, { representation: 'date'});
     try {
       setSubmitStatus('loading')
-      await TasksStore.submitTask(projectId, {...fields, due_on, parent: superTask && superTask.id})
+      await TaskTrackerStore.submitTask(projectId, {...fields, due_on, parent: superTask && superTask.id})
       setFields(initialTask)
       setSubmitStatus(null)
       setTimeout(() => delete localStorage[`taskTrackerIncomplete_${projectId}`])
