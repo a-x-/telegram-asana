@@ -14,14 +14,39 @@ import ChatStore from '../../Stores/ChatStore';
 import TaskTrackerStore, { normMapping } from '../../Stores/TaskTrackerStore';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
+const placeScriptGuideText = `
+// Task Place Compute Script
+// Examples. Choose one and customize it!
+
+// find single Placeholder task by name
+({tasks}) => {
+  const superTaskId = tasks.find(t => t.name === 'Placeholder task').gid
+  return [{superTaskId, sectionId: null}]
+}
+
+// find single Section
+({sections}) => {
+  const sectionId = tasks.find(t => t.name === 'Hot tasks section').gid
+  return [{superTaskId: null, sectionId}]
+}
+
+// static task or section id
+[{sectionId: '4646463535'}]
+
+// several place options
+[{superTaskId: '4646463535'}, {superTaskId: '6646463599'}]
+`;
+
 export default function TaskTracker ({ onClose }) {
     const [initialSettings] = useState(() => localStorage.taskTrackerSettings && JSON.parse(localStorage.taskTrackerSettings))
     const {t} = useTranslation();
     const patRef = useRef();
     const mappingRef = useRef();
+    const placeScriptRef = useRef();
     const [mappingText, setMapping] = useState(initialSettings && initialSettings.mappingText || '');
     const [pat, setPat] = useState(initialSettings && initialSettings.pat || '');
-    const settings = useMemo(() => ({ pat, mappingText }), [pat, mappingText]);
+    const [placeScript, setPlaceScript] = useState(initialSettings && initialSettings.placeScript || placeScriptGuideText);
+    const settings = useMemo(() => ({ pat, mappingText, placeScript }), [pat, mappingText, placeScript]);
     useEffect(() => void (localStorage.taskTrackerSettings = JSON.stringify(settings)), [settings])
 
     return (
@@ -63,6 +88,7 @@ export default function TaskTracker ({ onClose }) {
                             style={{ flexBasis: '50%', marginLeft: 16 }}
                         />
                     </div>
+
                     <TextField variant="outlined" multiline rows={ 16 } fullWidth
                         label="Mapping: Chat id <-> Project id"
                         placeholder={`chat_id project_id\nchat_id project_id\nchat_id project_id`}
@@ -71,6 +97,16 @@ export default function TaskTracker ({ onClose }) {
                         inputRef={mappingRef}
                         value={mappingText}
                         onChange={ () => mappingRef.current && setMapping(normMapping(mappingRef.current.value)) }
+                    />
+                </Box>
+                <Box p={2}>
+                    <TextField variant="outlined" multiline rows={ 16 } fullWidth
+                        label="Task Place Compute Script"
+                        style={{marginTop: 16 }}
+                        inputProps={{style:{ whiteSpace: 'nowrap' }}}
+                        inputRef={placeScriptRef}
+                        value={placeScript}
+                        onChange={ () => placeScriptRef.current && setPlaceScript(normMapping(placeScriptRef.current.value)) }
                     />
                 </Box>
             </div>

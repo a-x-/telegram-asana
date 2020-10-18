@@ -1,4 +1,5 @@
 import EventEmitter from './EventEmitter';
+import {memoize} from 'lodash'; // Note: uses 1th arg as string only!
 
 export const TT = {
   ASANA: 'ASANA',
@@ -12,6 +13,7 @@ const asanaHeaders = new Headers({
   'Content-Type': 'application/json',
   'Authorization': `Bearer ${taskTrackerSettings && taskTrackerSettings.pat || 'OPEN TELEGRAM SETTINS > TaskTracker'}`,
 })
+const getTaskPlaces = getTaskPlaceScript(taskTrackerSettings)
 
 
 class TaskTrackerStore extends EventEmitter {
@@ -22,6 +24,7 @@ class TaskTrackerStore extends EventEmitter {
         this.loadProjects();
         this.loadUsers();
       }, 1000); // low priority
+    this.getTasks = memoize(this._getTasks);
   }
   reset() {
     this.projects = initialProjects;
@@ -38,6 +41,15 @@ class TaskTrackerStore extends EventEmitter {
     this.users = users.map((item) => ({...item, id: item.gid}));
     // todo: error,loading
   }
+  async _getTasks(projectId) {
+    if (!projectId) {
+      console.error('getTasks: projectId is unset')
+      return []
+    }
+    const {data: tasks} = await fetch(`https://app.asana.com/api/1.0/tasks?project=${projectId}`, { headers: asanaHeaders }).then(r => r.json())
+    return tasks.map((item) => ({...item, id: item.gid}));
+    // todo: error,loading
+  }
 
   //
   // == Public
@@ -50,6 +62,11 @@ class TaskTrackerStore extends EventEmitter {
     const params = { method: 'POST', headers: asanaHeaders, body: JSON.stringify({data: {...data, projects: [projectId]}}) };
     const res = await fetch('https://app.asana.com/api/1.0/tasks', params).then(res => res.json());
     if (res.errors) throw new Error(res.errors[0] && res.errors[0].message || 'Error');
+  }
+
+  getTaskPlaces = async (projectId) => {
+    const tasks = await this.getTasks(projectId)
+    return getTaskPlaces({ tasks })
   }
 }
 
@@ -65,6 +82,13 @@ function parseMapping (mappingText) {
 
 export function normMapping (mappingText) {
   return mappingText.trimLeft().replace(/\n{2,}/g, '\n').replace(/ +/g, ' ');
+}
+
+function getTaskPlaceScript (settings) {
+  const result = settings && settings.placeScript && eval(settings.placeScript)
+  if (typeof result === 'function') return result;
+  if (Array.isArray(result)) return () => result;
+  return undefined;
 }
 
 const store = new TaskTrackerStore();
