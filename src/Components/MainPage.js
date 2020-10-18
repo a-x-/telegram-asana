@@ -34,10 +34,9 @@ class MainPage extends React.Component {
 
         this.dialogDetailsRef = React.createRef();
 
-        const { isChatDetailsVisible, mediaViewerContent, profileMediaViewerContent, isSmallWidth } = AppStore;
+        const { mediaViewerContent, profileMediaViewerContent, isSmallWidth } = AppStore;
 
         this.state = {
-            isChatDetailsVisible,
             mediaViewerContent,
             profileMediaViewerContent,
             isSmallWidth,
@@ -51,7 +50,6 @@ class MainPage extends React.Component {
         UserStore.on('clientUpdateOpenUser', this.onClientUpdateOpenUser);
         ChatStore.on('clientUpdateOpenChat', this.onClientUpdateOpenChat);
 
-        AppStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
         AppStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
@@ -64,7 +62,6 @@ class MainPage extends React.Component {
         UserStore.off('clientUpdateOpenUser', this.onClientUpdateOpenUser);
         ChatStore.off('clientUpdateOpenChat', this.onClientUpdateOpenChat);
 
-        AppStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
         AppStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
@@ -105,12 +102,6 @@ class MainPage extends React.Component {
         const { userId, popup } = update;
 
         this.handleSelectUser(userId, popup);
-    };
-
-    onClientUpdateChatDetailsVisibility = update => {
-        const { isChatDetailsVisible } = AppStore;
-
-        this.setState({ isChatDetailsVisible });
     };
 
     onClientUpdateMediaViewerContent = update => {
@@ -174,24 +165,24 @@ class MainPage extends React.Component {
     render() {
         const {
             instantViewContent,
-            isChatDetailsVisible,
             mediaViewerContent,
             profileMediaViewerContent,
             forwardInfo,
             videoInfo,
             isSmallWidth
         } = this.state;
+        const isRightPanelOpen = Boolean(ChatStore.get(this.state.chatId))
 
         return (
             <>
                 <div
                     className={classNames('page', {
                         'page-small': isSmallWidth,
-                        'page-third-column': isChatDetailsVisible
+                        'page-third-column': isRightPanelOpen
                     })}>
                     <Dialogs />
                     <DialogDetails ref={this.dialogDetailsRef} />
-                    {isChatDetailsVisible && <ChatInfo />}
+                    <ChatInfo onChangeChatId={(chatId) => this.setState({ chatId })} />
                 </div>
                 <Actions/>
                 {instantViewContent && <InstantViewer {...instantViewContent} />}

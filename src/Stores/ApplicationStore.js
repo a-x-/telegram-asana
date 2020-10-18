@@ -49,7 +49,6 @@ class ApplicationStore extends EventEmitter {
         this.authorizationState = null;
         this.defaultPhone = null;
         this.connectionState = null;
-        this.isChatDetailsVisible = true;
         this.mediaViewerContent = null;
         this.profileMediaViewerContent = null;
         this.dragParams = null;
@@ -189,13 +188,6 @@ class ApplicationStore extends EventEmitter {
             case 'clientUpdateCacheLoaded': {
                 this.cacheLoaded = true;
                 this.emit('clientUpdateCacheLoaded');
-                break;
-            }
-            case 'clientUpdateChatDetailsVisibility': {
-                const { visibility } = update;
-
-                this.isChatDetailsVisible = visibility;
-                this.emit('clientUpdateChatDetailsVisibility', update);
                 break;
             }
             case 'clientUpdateChatId': {

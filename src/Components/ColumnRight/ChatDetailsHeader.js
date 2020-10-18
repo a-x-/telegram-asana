@@ -12,14 +12,16 @@ import ArrowBackIcon from '../../Assets/Icons/Back';
 import CloseIcon from '../../Assets/Icons/Close';
 import { isChannelChat, isPrivateChat } from '../../Utils/Chat';
 import './ChatDetailsHeader.css';
+import { Tab, Tabs, withStyles } from '@material-ui/core';
+
+const HEADER_TABS = ['info', 'tasks', 'webs', 'files']
+
+const HeadTabs = withStyles({ indicator: { display: 'none' } })(Tabs)
+const HeadTab = withStyles({ root: { minWidth: 0, color: 'grey' }, selected: { color: 'black'} })(Tab);
 
 class ChatDetailsHeader extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
-        const { chatId, t, backButton, onClick, onClose } = this.props;
+        const { chatId, t, backButton, onBackClick, onClose, onTabChange } = this.props;
 
         let info = t('ChatInfo');
         if (isPrivateChat(chatId)) {
@@ -35,8 +37,19 @@ class ChatDetailsHeader extends React.Component {
                         <ArrowBackIcon />
                     </IconButton>
                 )}
-                <div className='header-status grow cursor-pointer' onClick={onClick}>
-                    <span className='header-status-content'>{info}</span>
+                <div className='header-status grow cursor-pointer' onClick={onBackClick}>
+                    <span className='header-status-content' style={{ overflow: 'visible' }}>
+                        <HeadTabs
+                            style={{ marginLeft: -12 }}
+                            value={ HEADER_TABS.findIndex(t => t === this.props.tab) }
+                            onChange={ (_, value) => onTabChange(HEADER_TABS[value]) }
+                        >
+                            <HeadTab label="info" className="chat-header-text">{info}</HeadTab>
+                            <HeadTab label="tasks">Tasks</HeadTab>
+                            <HeadTab label="webs" disabled>Webs</HeadTab>
+                            <HeadTab label="files" disabled>Files</HeadTab>
+                        </HeadTabs>
+                    </span>
                 </div>
                 {!backButton && (
                     <IconButton className='header-right-button' onClick={onClose}>

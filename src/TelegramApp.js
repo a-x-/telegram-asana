@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import { compose } from './Utils/HOC';
 import withLanguage from './Language';
 import withTelegramTheme from './Theme';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import withTheme from '@material-ui/core/styles/withTheme';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
@@ -36,6 +37,10 @@ import AuthorizationStore from './Stores/AuthorizationStore';
 import MessageStore from './Stores/MessageStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
+
+import DatefnsUtils from '@date-io/date-fns';
+import ruLocale from "date-fns/locale/ru";
+
 
 // import MainPage from './Components/MainPage';
 const MainPage = React.lazy(() => import('./Components/MainPage'));
@@ -337,37 +342,39 @@ class TelegramApp extends Component {
         }
 
         return (
-            <div
-                id='app'
-                className={theme.palette.type === 'dark' ? 'dark' : 'light'}
-                onDragOver={this.handleDragOver}
-                onDrop={this.handleDrop}
-                // onKeyDown={KeyboardManager.handleKeyDown} tabIndex={-1}
-            >
-                {page}
-                <Dialog
-                    manager={modalManager}
-                    transitionDuration={0}
-                    open={fatalError}
-                    onClose={this.handleRefresh}
-                    aria-labelledby='fatal-error-dialog-title'
-                    aria-describedby='fatal-error-dialog-description'>
-                    <DialogTitle id='fatal-error-dialog-title'>Telegram</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText id='fatal-error-dialog-description'>
-                            Oops! Something went wrong. We need to refresh this page.
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={this.handleDestroy} color='primary'>
-                            Log out
-                        </Button>
-                        <Button onClick={this.handleRefresh} color='primary' autoFocus>
-                            Refresh
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            </div>
+            <MuiPickersUtilsProvider utils={DatefnsUtils} locale={ruLocale}>
+                <div
+                    id='app'
+                    className={theme.palette.type === 'dark' ? 'dark' : 'light'}
+                    onDragOver={this.handleDragOver}
+                    onDrop={this.handleDrop}
+                    // onKeyDown={KeyboardManager.handleKeyDown} tabIndex={-1}
+                >
+                    {page}
+                    <Dialog
+                        manager={modalManager}
+                        transitionDuration={0}
+                        open={fatalError}
+                        onClose={this.handleRefresh}
+                        aria-labelledby='fatal-error-dialog-title'
+                        aria-describedby='fatal-error-dialog-description'>
+                        <DialogTitle id='fatal-error-dialog-title'>Telegram</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id='fatal-error-dialog-description'>
+                                Oops! Something went wrong. We need to refresh this page.
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={this.handleDestroy} color='primary'>
+                                Log out
+                            </Button>
+                            <Button onClick={this.handleRefresh} color='primary' autoFocus>
+                                Refresh
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                </div>
+            </MuiPickersUtilsProvider>
         );
     }
 }

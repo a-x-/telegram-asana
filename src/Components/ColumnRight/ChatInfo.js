@@ -34,9 +34,10 @@ class ChatInfo extends React.Component {
 
         const { popup } = props;
         const { chatId, dialogChatId } = AppStore;
+        const chatId_ = popup ? dialogChatId : chatId;
 
         this.state = {
-            chatId: popup ? dialogChatId : chatId,
+            chatId: chatId_,
             migratedChatId: 0,
             userChatId: null,
             openGroupInCommon: false,
@@ -50,6 +51,7 @@ class ChatInfo extends React.Component {
             counters: null,
             migratedCounters: null
         };
+        props.onChangeChatId(chatId_) // TODO: перенести этот стейт выше
     }
 
     componentDidMount() {
@@ -110,6 +112,7 @@ class ChatInfo extends React.Component {
             counters: ChatStore.getCounters(update.nextChatId),
             migratedCounters: null
         });
+        this.props.onChangeChatId(update.nextChatId)
 
         if (!update.nextChatId) {
             this.handleCloseChatDetails();
@@ -186,6 +189,7 @@ class ChatInfo extends React.Component {
                 '@type': 'clientUpdateDialogChatId',
                 chatId: 0
             });
+            this.props.onChangeChatId(0)
         } else {
             changeChatDetailsVisibility(false);
         }
@@ -256,6 +260,8 @@ class ChatInfo extends React.Component {
             openSharedVoiceNotes,
             openGroupInCommon
         } = this.state;
+
+        if (!chatId) return null;
 
         const currentChatId = chatId || userChatId;
         const minHeight = this.detailsRef && this.detailsRef.current ? this.detailsRef.current.getContentHeight() : 0;

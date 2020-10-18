@@ -39,3 +39,29 @@
     min-height: 100%;
     box-sizing: border-box;
 }
+
+.chat-tasks-list .chat-wrapper {
+    padding: 0 8px;
+    align-items: stretch;
+}
+
+.chat-tasks-add {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    color: white;
+}
+
+.chat-tasks-new-form {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 8px;
+    z-index: 1;
+    background: white;
+}
+.chat-tasks-new-form-controls {
+    padding: 0 calc(22px - 16px); /* бляяя: 22 panel padding, 16 mui padding */
+}

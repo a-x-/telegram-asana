@@ -51,7 +51,6 @@ class DialogDetails extends Component {
     }
 
     componentDidMount() {
-        AppStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         ChatStore.on('clientUpdateChatBackground', this.onClientUpdateChatBackground);
         FileStore.on('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
@@ -59,7 +58,6 @@ class DialogDetails extends Component {
     }
 
     componentWillUnmount() {
-        AppStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
         ChatStore.off('clientUpdateChatBackground', this.onClientUpdateChatBackground);
         FileStore.off('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
@@ -133,10 +131,6 @@ class DialogDetails extends Component {
         this.setState({
             wallpaper
         });
-    };
-
-    onClientUpdateChatDetailsVisibility = update => {
-        this.forceUpdate();
     };
 
     onClientUpdateChatId = update => {
