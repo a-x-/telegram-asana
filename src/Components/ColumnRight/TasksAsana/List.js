@@ -7,6 +7,7 @@ import {Box, CircularProgress, Fab, Link, List, ListItem, ListItemIcon, ListItem
 import CheckedIcon from '@material-ui/icons/RadioButtonChecked';
 import UncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import { Add } from '@material-ui/icons';
+import { useTranslation } from 'react-i18next';
 
 export default function TasksList ({ chatId, onNewTaskToggle }) {
   const [{ chats, getSectionsWithTasks }] = useState(TaskTrackerStore);
@@ -14,6 +15,7 @@ export default function TasksList ({ chatId, onNewTaskToggle }) {
   const [sections, setSections] = useState(() => sessionStorage[`taskTracker_sections_${projectId}`] && JSON.parse(sessionStorage[`taskTracker_sections_${projectId}`]) || null)
   const [status, setStatus] = useState(null)
   const [refreshToken, setRefreshToken] = useState(null)
+  const {t} = useTranslation();
 
   useEffect(() => {
     setStatus('loading')
@@ -28,12 +30,19 @@ export default function TasksList ({ chatId, onNewTaskToggle }) {
               <div className='chat-details-items'>
                 {status === 'loading' && <CircularProgress style={{ right: 30, position: 'absolute' }} size={24} /> }
                 {sections
-                  ? sections.map((section) => <>
-                    { section.name && section.name !== '(no section)' && (
-                      <Typography variant='h6' style={{ marginLeft: 16, color: 'grey' }}>{ section.name.toLowerCase() }</Typography>
-                    )}
-                    {renderItems(section.tasks)}
-                  </>)
+                  ? sections.map((section) => {
+                    const closedTasks = section.tasks.filter(t => t.completed)
+                    return <>
+                      { section.name && section.name !== '(no section)' && (
+                        <Typography variant='h6' style={{ marginLeft: 16, color: 'grey', marginTop: 16 }}>{ section.name.toLowerCase() }</Typography>
+                      )}
+                      {renderItems(section.tasks.filter(t => !t.completed))}
+                      {Boolean(closedTasks.length) && <details style={{ marginBottom: 16 }}>
+                        <summary style={{ color: 'silver' }}>{closedTasks.length} {t('closed tasks')}</summary>
+                        {renderItems(closedTasks)}
+                      </details>}
+                    </>
+                  })
                   : <Box p={2}><i style={{ color: 'grey' }}>Just a sec</i></Box>
                 }
               </div>

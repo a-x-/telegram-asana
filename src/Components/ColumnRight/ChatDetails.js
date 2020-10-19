@@ -54,6 +54,7 @@ import './ChatDetails.css';
 import { CSSTransition } from 'react-transition-group';
 import TasksList from './TasksAsana/List';
 import NewTask from './TasksAsana/NewTask';
+import { isToday } from 'date-fns';
 
 class ChatDetails extends React.Component {
     constructor(props) {
@@ -71,7 +72,7 @@ class ChatDetails extends React.Component {
         this.state = {
             prevChatId: chatId,
             headerTab: tasksStore ? 'tasks' : 'info',
-            newTaskFormOpen: Boolean(localStorage[`taskTrackerIncomplete_${projectId}`]) && Object.values(JSON.parse(localStorage[`taskTrackerIncomplete_${projectId}`])).some(Boolean),
+            newTaskFormOpen: checkShouldTaskFormOpen(projectId),
         };
     }
 
@@ -132,7 +133,7 @@ class ChatDetails extends React.Component {
             const projectId = tasksStore && tasksStore.projectId
             this.setState({
                 headerTab: tasksStore ? 'tasks' : 'info',
-                newTaskFormOpen: Boolean(localStorage[`taskTrackerIncomplete_${projectId}`]) && Object.values(JSON.parse(localStorage[`taskTrackerIncomplete_${projectId}`])).some(Boolean),
+                newTaskFormOpen: checkShouldTaskFormOpen(projectId),
             });
         }
     }
@@ -554,5 +555,14 @@ const enhance = compose(
     withSnackbar,
     withRestoreRef()
 );
+
+function checkShouldTaskFormOpen(projectId) {
+    const json = localStorage[`taskTrackerIncomplete_${projectId}`]
+    if (!json) return
+    return Object.entries(JSON.parse(json))
+        .filter(([key, value]) => key !== 'parent' && (key === 'due_on' ? !isToday(value) : true))
+        .map(([_, value]) => value)
+        .some(Boolean)
+}
 
 export default enhance(ChatDetails);
