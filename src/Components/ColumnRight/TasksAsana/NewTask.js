@@ -32,9 +32,9 @@ export default function NewTask ({ chatId, onClose }) {
     const [fields, setFields] = useState(() => getInitialFields(projectId))
     const { t } = useTranslation();
     const refs = useRef({})
-    const [taskPlaces, setTaskPlaces] = useState([])
+    const [taskPlaces, setTaskPlaces] = useState(null)
     const [tasks, setTasks] = useState([])
-    const superTask = useMemo(() => taskPlaces[0] && tasks.find(t => t.id === taskPlaces[0].superTaskId), [taskPlaces, tasks])
+    const superTask = useMemo(() => taskPlaces && taskPlaces[0] && tasks.find(t => t.id === taskPlaces[0].superTaskId), [taskPlaces, tasks])
     const persistFields = useCallback(debounce((_fields) => void setTimeout(() => {
       const fields = { ..._fields, due_on: _fields.due_on && formatISO(_fields.due_on, { representation: 'date'})}
       console.log('save fields', fields, 'to', projectId)
@@ -67,20 +67,30 @@ export default function NewTask ({ chatId, onClose }) {
         <div className='chat-tasks-new-form-controls'>
             <FormControl fullWidth variant='outlined'>
                 <Box p={2}>
-                  {taskPlaces&&taskPlaces.length <= 1
-                    ? <Typography variant='caption' style={{ color: 'grey'}}>
-                        {taskPlaces[0] && superTask
+                  {!taskPlaces && (
+                    <Typography variant='caption' style={{ color: 'grey'}}><i>Loading task place...</i></Typography>
+                  ) ||
+                  taskPlaces.length <= 1 && (
+                    <Typography variant='caption' style={{ color: 'grey'}}>
+                      {
+                        superTask
                           ? <Link color="inherit" underline="none" href={`https://app.asana.com/0/${projectId}/${superTask.id}`} target="_blank" rel="noopener noreferrer">
                             {superTask.name} ❯
                           </Link>
-                          : <i>Loading task place...</i>
-                        }
-                      </Typography>
-                    : (
-                      <span>((тут будет выбор одного концерта из нескольких доступных))</span>
-                      // <TextField select {...getFieldProps('superTask', {targetValue: true})} style={{ marginBottom: 8 }}>
-                      //   {users && users.map(user => <MenuItem key={user.id} value={user.id}>{ user.name }</MenuItem>)}
-                      // </TextField>
+                          : <Link color="inherit" underline="none" href={`https://app.asana.com/0/${projectId}`} target="_blank" rel="noopener noreferrer">
+                            {t('Project root')} ❯
+                          </Link>
+                      }
+                    </Typography>
+                  ) ||
+                  (
+                    <select onChange={e=> setFields({ parent: e.target.value})} value={fields.parent || ''} style={{ opacity: .6, border: 'none', width: '100%', boxShadow: '0 8px 0 -1px white, 0 9px 0 -1px grey'}}>
+                      <option value="">Project root</option>
+                      {taskPlaces.map(p => {
+                        const name = tasks.find(t => t.id === p.superTaskId).name
+                        return <option key={p.id} value={p.superTaskId}>{name}</option>
+                      })}
+                    </select>
                   )}
                 </Box>
                 <Box p={2}>
