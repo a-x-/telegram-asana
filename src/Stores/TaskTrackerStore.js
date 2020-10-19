@@ -31,14 +31,14 @@ class TaskTrackerStore extends EventEmitter {
     this.users = [];
   }
   async loadProjects() {
-    const {data: projects} = await fetch('https://app.asana.com/api/1.0/projects', { headers: asanaHeaders }).then(r => r.json())
-    this.projects = projects.map((item) => ({...item, id: item.gid}));
-    // todo: error,loading
+    const {data: projects, errors} = await fetch('https://app.asana.com/api/1.0/projects', { headers: asanaHeaders }).then(r => r.json())
+    if (errors) throw new Error(errors[0] && errors[0].message || 'Error');
+    this.projects = withIds(projects)
   }
   async loadUsers() {
-    const {data: users} = await fetch('https://app.asana.com/api/1.0/users', { headers: asanaHeaders }).then(r => r.json())
-    this.users = users.map((item) => ({...item, id: item.gid}));
-    // todo: error,loading
+    const {data: users, errors} = await fetch('https://app.asana.com/api/1.0/users', { headers: asanaHeaders }).then(r => r.json())
+    if (errors) throw new Error(errors[0] && errors[0].message || 'Error');
+    this.users = withIds(users)
   }
 
   //
@@ -49,9 +49,19 @@ class TaskTrackerStore extends EventEmitter {
       console.error('getTasks: projectId is unset')
       return []
     }
-    const {data: tasks} = await fetch(`https://app.asana.com/api/1.0/tasks?project=${projectId}`, { headers: asanaHeaders }).then(r => r.json())
-    return tasks.map((item) => ({...item, id: item.gid}));
-    // todo: error,loading
+    const {data: tasks, errors} = await fetch(`https://app.asana.com/api/1.0/projects/${projectId}/tasks`, { headers: asanaHeaders }).then(r => r.json())
+    if (errors) throw new Error(errors[0] && errors[0].message || 'Error');
+    return withIds(tasks)
+  }
+  getTasksBySection = async (sectionId, fields) => {
+    if (!sectionId) {
+      console.error('getTasksBySection: sectionId is unset')
+      return []
+    }
+    const url = `https://app.asana.com/api/1.0/sections/${sectionId}/tasks${fields ? `?opt_expand=${fields.join(',')}` : ''}`
+    const {data: tasks, errors} = await fetch(url, { headers: asanaHeaders }).then(r => r.json())
+    if (errors) throw new Error(errors[0] && errors[0].message || 'Error');
+    return withIds(tasks)
   }
   /**
    * @param projectId {number}
@@ -66,20 +76,32 @@ class TaskTrackerStore extends EventEmitter {
 
   getTaskPlaces = ({tasks}) => _getTaskPlaces({tasks})
 
-  getFullTasks = async (projectId) => {
-    const tasks = await this.getTasks(projectId);
-    const fields = ['notes', 'name', 'permalink_url', 'gid', 'assignee', 'completed', 'section'].join(',');
-    const fullTasks = await Promise.all(tasks.map(t => fetch(`https://app.asana.com/api/1.0/tasks/${ t.id }?opt_fields=${fields}`, { headers: asanaHeaders }).then(res => res.json())))
-    return fullTasks.map(({data: item}) => ({...item, id: item.gid}));
-    // todo: error,loading
+  getSectionsWithTasks = async (projectId) => {
+    const taskFields = ['notes', 'name', 'permalink_url', 'gid', 'assignee.name', 'completed', 'section'];
+    const sections = await Promise.all((await this.getSections(projectId))
+      .map(section => awaitAndEnchance(
+        this.getTasksBySection(section.id, taskFields),
+        tasks => ({tasks, ...section})
+      ))
+    );
+    return sections; // Array<{id, name, tasks: Task[]}>
   }
 
   getSections = async (projectId) => {
-    const {data: tasks} = await fetch(`https://app.asana.com/api/1.0/tasks?project=${projectId}`, { headers: asanaHeaders }).then(r => r.json())
-    return tasks.map((item) => ({...item, id: item.gid}));
-    // todo: error,loading
-
+    const {data: tasks, errors} = await fetch(`https://app.asana.com/api/1.0/projects/${projectId}/sections`, { headers: asanaHeaders }).then(r => r.json())
+    if (errors) throw new Error(errors[0] && errors[0].message || 'Error');
+    return withIds(tasks)
   }
+}
+
+function withIds (items) {
+  return items.map((item) => ({...item, id: item.gid}));
+}
+
+function awaitAndEnchance (promise, mapper) {
+  return new Promise((resolve, reject) => {
+    promise.then((res) => resolve(mapper(res)), reject);
+  })
 }
 
 function parseMapping (mappingText) {
