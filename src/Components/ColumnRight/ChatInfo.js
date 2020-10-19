@@ -396,7 +396,8 @@ ChatInfo.propTypes = {
 ChatInfo.defaultProps = {
     className: null,
     classes: null,
-    popup: false
+    popup: false,
+    onChangeChatId: () => {}
 };
 
 export default ChatInfo;

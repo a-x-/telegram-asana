@@ -71,7 +71,7 @@ class ChatDetails extends React.Component {
         this.members = new Map();
         this.state = {
             prevChatId: chatId,
-            headerTab: tasksStore ? 'tasks' : 'info',
+            headerTab: tasksStore && !props.popup ? 'tasks' : 'info',
             newTaskFormOpen: checkShouldTaskFormOpen(projectId),
         };
     }
@@ -387,7 +387,9 @@ class ChatDetails extends React.Component {
         if (!chat) {
             return (
                 <div className='chat-details'>
-                    <ChatDetailsHeader onClose={onClose} tab={this.state.headerTab} onTabChange={(tab) => this.setState({ headerTab: tab })}/>
+                    {!popup && (
+                        <ChatDetailsHeader onClose={onClose} tab={this.state.headerTab} onTabChange={(tab) => this.setState({ headerTab: tab })}/>
+                    )}
                     <div ref={this.listRef} className={classNames('chat-details-list', 'scrollbars-hidden')} />
                 </div>
             );
@@ -452,12 +454,12 @@ class ChatDetails extends React.Component {
                         </div>
                 </CSSTransition>
 
-                <ChatDetailsHeader
+                {!popup && <ChatDetailsHeader
                     chatId={chatId}
                     backButton={backButton}
                     onClose={onClose}
                     onBackClick={this.handleHeaderClick}
-                    tab={this.state.headerTab} onTabChange={(tab) => this.setState({ headerTab: tab })} />
+                    tab={this.state.headerTab} onTabChange={(tab) => this.setState({ headerTab: tab })} />}
                 {this.state.headerTab === 'info' && this.renderInfo(chatId, popup, photo, isMe, bio, t, username, phoneNumber, isGroup)}
                 {this.state.headerTab === 'tasks' && <TasksList chatId={chatId} onNewTaskToggle={() => this.setState(({newTaskFormOpen}) => ({ newTaskFormOpen: !newTaskFormOpen}))} />}
             </>

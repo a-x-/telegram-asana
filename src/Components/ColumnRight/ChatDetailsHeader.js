@@ -55,11 +55,6 @@ class ChatDetailsHeader extends React.Component {
                         </HeadTabs>
                     </span>
                 </div>
-                {!backButton && (
-                    <IconButton className='header-right-button' onClick={onClose}>
-                        <CloseIcon />
-                    </IconButton>
-                )}
             </div>
         );
     }
