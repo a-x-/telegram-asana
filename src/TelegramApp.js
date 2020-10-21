@@ -72,7 +72,7 @@ class TelegramApp extends Component {
     }
 
     handleKeyDown = async event => {
-        const { altKey, ctrlKey, keyCode, key, metaKey, repeat, shiftKey, isComposing } = event;
+        const { altKey, ctrlKey, key, metaKey, repeat, shiftKey, isComposing } = event;
 
         this.keyMap.set(key, key);
 
@@ -85,7 +85,8 @@ class TelegramApp extends Component {
             return;
         }
 
-        if (event.isComposing) {
+        // fix CJK input (https://developer.mozilla.org/en-US/docs/Web/API/Element/compositionstart_event#Result)
+        if (isComposing) {
             return;
         }
 

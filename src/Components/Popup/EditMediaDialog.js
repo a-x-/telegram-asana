@@ -253,7 +253,7 @@ class EditMediaDialog extends React.Component {
     handleKeyDown = event => {
         const { altKey, ctrlKey, key, keyCode, code, metaKey, shiftKey, repeat, nativeEvent } = event;
 
-        // fix CJK input
+        // fix CJK input (https://developer.mozilla.org/en-US/docs/Web/API/Element/compositionstart_event#Result)
         const { isComposing } = nativeEvent;
         if (isComposing) {
             event.stopPropagation();

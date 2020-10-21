@@ -25,10 +25,9 @@ const titles = {
 }
 
 export default function NewTask ({ chatId, onClose }) {
-    const [{ projects, chats, users: _users, getTaskPlaces, getTasks }] = useState(TaskTrackerStore);
+    const [{ projects, chats, users, getTaskPlaces, getTasks }] = useState(TaskTrackerStore);
     const projectId = chats && chatId && chats[chatId] && chats[chatId].tasksStore.projectId
     const [submitStatus, setSubmitStatus] = useState(null);
-    const users = useMemo(() => [{id:'me', name: 'Me'}, ..._users], [_users]);
     const [fields, setFields] = useState(() => getInitialFields(projectId))
     const { t } = useTranslation();
     const refs = useRef({})
@@ -98,7 +97,9 @@ export default function NewTask ({ chatId, onClose }) {
                 </Box>
                 <Box p={2}>
                   <TextField select {...getFieldProps('assignee', {targetValue: true})} style={{ marginBottom: 8 }}>
+                    <MenuItem value="me"><i>Me</i></MenuItem>
                     {users && users.map(user => <MenuItem key={user.id} value={user.id}>{ user.name }</MenuItem>)}
+                    <MenuItem value=""><i>Nobody</i></MenuItem>
                   </TextField>
                   <Chip onClick={ () => setFields(fields => ({ ...fields, assignee: 'me' })) } label={t('Me')}/>
                 </Box>

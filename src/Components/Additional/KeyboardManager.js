@@ -1,8 +1,7 @@
 /*
- *  Copyright (c) 2018-present, Evgeny Nadymov
- *
- * This source code is licensed under the GPL v.3.0 license found in the
- * LICENSE file in the root directory of this source tree.
+ * Event#stopPropagation alternative.
+ * Only top registred layer will receive keydown events.
+ * Usualy used for Escaping topmost layers in combination with ModalManager.
  */
 
 export class KeyboardHandler {
@@ -33,11 +32,13 @@ class KeyboardManager {
         }
     };
 
+    /** register layer */
     add(handler) {
         // console.log('[keydown] KeyboardManager.add', handler);
         this.handlers.push(handler);
     }
 
+    /** pop layer */
     remove(handler) {
         // console.log('[keydown] KeyboardManager.remove', handler);
         const index = this.handlers.indexOf(handler);
