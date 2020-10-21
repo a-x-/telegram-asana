@@ -107,18 +107,18 @@ class ChatDetails extends React.Component {
         return snapshot;
     }
 
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     const { chatId, theme, counters, migratedCounters } = this.props;
+    shouldComponentUpdate(nextProps, nextState) {
+        const { chatId, theme, counters, migratedCounters } = this.props;
 
-    //     if (nextProps.chatId !== chatId) return true;
-    //     if (nextProps.counters !== counters) return true;
-    //     if (nextProps.migratedCounters !== migratedCounters) return true;
-    //     if (nextProps.theme !== theme) return true;
-    //     if (nextState.headerTab !== this.state.headerTab) return true
-    //     if (nextState.newTaskFormOpen !== this.state.newTaskFormOpen) return true
+        if (nextProps.chatId !== chatId) return true;
+        if (nextProps.counters !== counters) return true;
+        if (nextProps.migratedCounters !== migratedCounters) return true;
+        if (nextProps.theme !== theme) return true;
+        if (nextState.headerTab !== this.state.headerTab) return true
+        if (nextState.newTaskFormOpen !== this.state.newTaskFormOpen) return true
 
-    //     return false;
-    // }
+        return false;
+    }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { chatId } = this.props;
