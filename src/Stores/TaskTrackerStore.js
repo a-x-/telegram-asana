@@ -1,18 +1,13 @@
 import EventEmitter from './EventEmitter';
 import {memoize} from 'lodash'; // Note: uses 1th arg as string only!
+import { taskTrackerSettings, parseMapping, asanaHeaders } from '../Utils/Api';
+export const initialTasks = []
+export const initialProjects = []
+export const initialChats = taskTrackerSettings ? parseMapping(taskTrackerSettings.mappingText) : {}
 
 export const TT = {
   ASANA: 'ASANA',
 }
-const taskTrackerSettings = localStorage.taskTrackerSettings && JSON.parse(localStorage.taskTrackerSettings)
-export const initialTasks = []
-export const initialProjects = []
-export const initialChats = taskTrackerSettings ? parseMapping(taskTrackerSettings.mappingText) : {}
-const asanaHeaders = new Headers({
-  'Accept': 'application/json',
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${taskTrackerSettings && taskTrackerSettings.pat || 'OPEN TELEGRAM SETTINS > TaskTracker'}`,
-})
 const _getTaskPlaces = getTaskPlaceScript(taskTrackerSettings)
 
 
@@ -77,14 +72,18 @@ class TaskTrackerStore extends EventEmitter {
   getTaskPlaces = ({tasks}) => _getTaskPlaces({tasks})
 
   getSectionsWithTasks = async (projectId) => {
-    const taskFields = ['notes', 'name', 'permalink_url', 'gid', 'assignee.name', 'completed', 'section'];
+    const allTasks = {}
+    const taskFields = ['notes', 'name', 'permalink_url', 'gid', 'assignee.name', 'completed', 'section', 'due_on'];
     const sections = await Promise.all((await this.getSections(projectId))
       .map(section => awaitAndEnchance(
         this.getTasksBySection(section.id, taskFields),
-        tasks => ({tasks, ...section})
+        tasks => {
+          tasks.forEach(t => allTasks[t.id] = t)
+          return {tasks: tasks.map(t => t.id), ...section}
+        }
       ))
     );
-    return sections; // Array<{id, name, tasks: Task[]}>
+    return {sections, all: { tasks: allTasks }}; // Array<{id, name, tasks: Task[]}>
   }
 
   getSections = async (projectId) => {
@@ -102,20 +101,6 @@ function awaitAndEnchance (promise, mapper) {
   return new Promise((resolve, reject) => {
     promise.then((res) => resolve(mapper(res)), reject);
   })
-}
-
-function parseMapping (mappingText) {
-  const res = {};
-  normMapping(mappingText).trim().replace(/\s*\(.+?\)/g, '').split('\n').forEach(line => {
-    const [chatId, projectId] = line.trim().split(' ')
-    res[chatId] = {tasksStore: {projectId}};
-  })
-  return res;
-}
-
-
-export function normMapping (mappingText) {
-  return mappingText.trimLeft().replace(/\n{2,}/g, '\n').replace(/ +/g, ' ');
 }
 
 function getTaskPlaceScript (settings) {

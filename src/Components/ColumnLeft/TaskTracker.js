@@ -11,8 +11,9 @@ import ArrowBackIcon from '../../Assets/Icons/Back';
 import './TaskTracker.css';
 import { TextField, Link, Box, Typography, ListItem, List } from '@material-ui/core';
 import ChatStore from '../../Stores/ChatStore';
-import TaskTrackerStore, { normMapping } from '../../Stores/TaskTrackerStore';
+import TaskTrackerStore from '../../Stores/TaskTrackerStore';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { normMapping } from '../../Utils/Api';
 
 const placeScriptGuideText = `
 // Task Place Compute Script

@@ -1,0 +1,13 @@
+.chat-tasks-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow-y: hidden; /* HACK: fix nested scroll container */
+}
+.chat-tasks-list-wrap {
+  overflow-y: auto;
+}
+.chat-tasks-list-wrap__short {
+  height: calc(37px * 6); /* 37: list-item calculated height */
+}

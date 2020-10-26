@@ -50,6 +50,7 @@
     right: 16px;
     bottom: 16px;
     color: white;
+    z-index: 5;
 }
 
 .chat-tasks-new-form {
@@ -59,7 +60,7 @@
     right: 0;
     bottom: 0;
     padding: 0 8px;
-    z-index: 1;
+    z-index: 10;
     background: white;
 }
 .chat-tasks-new-form-controls {
