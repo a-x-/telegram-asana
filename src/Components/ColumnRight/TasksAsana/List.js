@@ -12,14 +12,23 @@ import { useTranslation } from 'react-i18next';
 export default function TasksList ({ chatId, onNewTaskToggle }) {
   const [{ chats, getSectionsWithTasks }] = useState(TaskTrackerStore);
   const projectId = chats && chatId && chats[chatId] && chats[chatId].tasksStore.projectId
-  const [sections, setSections] = useState(() => sessionStorage[`taskTracker_sections_${projectId}`] && JSON.parse(sessionStorage[`taskTracker_sections_${projectId}`]) || null)
+  const [sectionsState, setSectionsState] = useState(() => getCache())
   const [status, setStatus] = useState(null)
   const [refreshToken, setRefreshToken] = useState(null)
   const {t} = useTranslation();
 
   useEffect(() => {
+    if (!projectId) return
     setStatus('loading')
-    getSectionsWithTasks(projectId).then(items => (setSections(items), setStatus(null), sessionStorage[`taskTracker_sections_${projectId}`] = JSON.stringify(items)), setStatus)
+
+    getSectionsWithTasks(projectId)
+      .then(items => {
+        setStatus(null);
+        const sectionsState_ = {...sectionsState, [projectId]: {items}};
+        setSectionsState(sectionsState_);
+        sessionStorage[`Tasktracker_sectionsState`] = JSON.stringify(sectionsState_)
+      })
+      .catch(setStatus)
   }, [projectId, refreshToken])
 
   useEffect(() => void TaskTrackerStore.on('taskCreated', () => setRefreshToken(Date.now())), [])
@@ -29,10 +38,10 @@ export default function TasksList ({ chatId, onNewTaskToggle }) {
           <div className='chat-wrapper'>
               <div className='chat-details-items'>
                 {status === 'loading' && <CircularProgress style={{ right: 30, position: 'absolute' }} size={24} /> }
-                {sections
-                  ? sections.map((section) => {
+                {sectionsState[projectId]
+                  ? sectionsState[projectId].items.map((section) => {
                     const closedTasks = section.tasks.filter(t => t.completed)
-                    return <>
+                    return <section key={section.id || section.name}>
                       { section.name && section.name !== '(no section)' && (
                         <Typography variant='h6' style={{ marginLeft: 16, color: 'grey', marginTop: 16 }}>{ section.name.toLowerCase() }</Typography>
                       )}
@@ -41,9 +50,15 @@ export default function TasksList ({ chatId, onNewTaskToggle }) {
                         <summary style={{ color: 'silver' }}>{closedTasks.length} {t('closed tasks')}</summary>
                         {renderItems(closedTasks)}
                       </details>}
-                    </>
+                    </section>
                   })
-                  : <Box p={2}><i style={{ color: 'grey' }}>Just a sec</i></Box>
+                  : <Box p={2}><i style={{ color: status instanceof Error ? 'darkred' : 'grey' }}>
+                    {status === 'loading'
+                      ? 'Just a sec'
+                      : status instanceof Error
+                      ? 'I tried, but I cannot show anything :('
+                      : 'No tasks yet, let`s get started!'
+                    }</i></Box>
                 }
               </div>
 
@@ -69,4 +84,8 @@ export default function TasksList ({ chatId, onNewTaskToggle }) {
       ))}
     </List>
   }
+}
+
+function getCache() {
+  return sessionStorage[`Tasktracker_sectionsState`] && JSON.parse(sessionStorage[`Tasktracker_sectionsState`]) || {}
 }

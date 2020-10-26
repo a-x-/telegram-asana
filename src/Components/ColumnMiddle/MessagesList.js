@@ -629,8 +629,11 @@ class MessagesList extends React.Component {
             this.loadIncompleteHistory(result);
 
             if (previousChatId !== chatId) {
-                getChatFullInfo(chatId);
-                getChatMedia(chatId);
+                // delay
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    getChatFullInfo(chatId);
+                    getChatMedia(chatId);
+                }))
             }
         } else {
             this.loading = true;
@@ -1051,27 +1054,11 @@ class MessagesList extends React.Component {
     };
 
     keepScrollPosition = snapshot => {
-        const { scrollTop, scrollHeight, offsetHeight } = snapshot;
-        const list = this.listRef.current;
-
-        // console.log(
-        //     `[ml] keepScrollPosition before
-        //     list.scrollTop=${list.scrollTop}
-        //     list.scrollHeight=${list.scrollHeight}
-        //     list.offsetHeight=${list.offsetHeight}
-        //     snapshot.scrollTop=${snapshot.scrollTop}
-        //     snapshot.scrollHeight=${snapshot.scrollHeight}
-        //     snapshot.offsetHeight=${snapshot.offsetHeight}`
-        // );
-
-        list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
-
-        // console.log(
-        //     `[ml] keepScrollPosition after
-        //     list.scrollTop=${list.scrollTop}
-        //     list.scrollHeight=${list.scrollHeight}
-        //     list.offsetHeight=${list.offsetHeight}`
-        // );
+        requestAnimationFrame(() => {
+            const { scrollTop, scrollHeight, offsetHeight } = snapshot;
+            const list = this.listRef.current;
+            list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
+        })
     };
 
     scrollToUnread = () => {

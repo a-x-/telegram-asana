@@ -734,7 +734,7 @@ class InputBox extends Component {
 
         const { innerHTML } = element;
         if (innerHTML === '<br>' || innerHTML === '<div><br></div>') {
-            element.innerHTML = null;
+            requestAnimationFrame(() => element.innerHTML = null);
         }
         const { innerText } = element;
 
