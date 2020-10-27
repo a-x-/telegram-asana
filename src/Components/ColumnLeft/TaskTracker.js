@@ -75,7 +75,7 @@ export default function TaskTracker ({ onClose }) {
                         <Autocomplete options={[...ChatStore.items.entries()].map(([_, item]) => item).filter(item => !mappingText.includes(item.id))}
                             getOptionLabel={item => item.title}
                             renderInput={(params) => <TextField {...params} label={t('Pick Chat')} variant="outlined" />}
-                            onChange={(_, value) => setMapping(text => normMapping(`${text}\n${value.id}(${value.title}) `))}
+                            onChange={(_, value) => setMapping(text => normMapping(`${text}\n${value.id}(${value.title.replace(/[()]/g, '')}) `))}
                             getOptionSelected={(item, value) => item.id === value}
                             value={null}
                             style={{ flexBasis: '50%'}}
@@ -83,7 +83,7 @@ export default function TaskTracker ({ onClose }) {
                         <Autocomplete options={[...TaskTrackerStore.projects.entries()].map(([_, item]) => item)}
                             getOptionLabel={item => item.name}
                             renderInput={(params) => <TextField {...params} label={t('Pick Project')} variant="outlined" />}
-                            onChange={(_, value) => setMapping(text => normMapping(`${text} ${value.id}(${value.name})\n`))}
+                            onChange={(_, value) => setMapping(text => normMapping(`${text} ${value.id}(${value.name.replace(/[()]/g, '')})\n`))}
                             getOptionSelected={(item, value) => item.id === value}
                             value={null}
                             style={{ flexBasis: '50%', marginLeft: 16 }}

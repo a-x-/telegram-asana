@@ -9,11 +9,12 @@
   - [ ] fix: в DOM постоянно висит множество диалогов, съедающих много времени
 - [ ] typescript, css-modules
 - [ ] нотификации, беджики папок
+- [ ] TaskCard: esc, edit name, subtasks, comments, open animation
+
 
 ### fixes
 - [ ] нотификации, беджики у папок
 - [ ] https
-- [ ] sections/:project +
 
 ### Backports
 - [ ] layout caching
