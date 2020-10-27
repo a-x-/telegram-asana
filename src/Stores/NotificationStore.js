@@ -179,7 +179,7 @@ class NotificationStore extends EventEmitter {
                     console.log('notification', message)
                     const text = message && message.content && message.content.text && message.content.text.text || (message.content && message.content['@type'] === "messageVoiceNote" ? '🎤 ' : '') + (message.content.caption.text || (message.content['@type'] === "messageVoiceNote" ? ' Voice' : ''));
                     const sender = UserStore.get(message.sender_user_id).first_name
-                    new Notification(sender ? sender + ' says' : 'New message', { body: text || '' });
+                    new Notification(sender ? sender + ' says' : 'New message', { body: text || '', icon: 'https://telegram.org/img/t_logo.png' });
 
                     if (this.enableSound && !this.windowFocused) {
                         const now = new Date();
