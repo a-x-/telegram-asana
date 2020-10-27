@@ -11,6 +11,7 @@ import { APP_NAME, NOTIFICATION_AUDIO_DELAY_MS } from '../Constants';
 import AppStore from './ApplicationStore';
 import ChatStore from './ChatStore';
 import MessageStore from './MessageStore';
+import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
 import { isChatMember, isMeChat } from '../Utils/Chat';
 
@@ -154,27 +155,33 @@ class NotificationStore extends EventEmitter {
                 break;
             }
             case 'updateNewMessage': {
-                const { windowFocused } = this;
-                if (!windowFocused) {
-                    const { message } = update;
-                    const { chat_id, id } = message;
+                const { message } = update;
+                const { chat_id, id } = message;
 
-                    // dismiss notifications for last visited public channels and groups
-                    if (!isChatMember(chat_id)) {
-                        break;
-                    }
+                // dismiss notifications for last visited public channels and groups
+                if (!isChatMember(chat_id)) {
+                    break;
+                }
 
-                    // dismiss notifications for me chat
-                    if (isMeChat(chat_id)) {
-                        break;
-                    }
+                // dismiss notifications for me chat
+                if (isMeChat(chat_id)) {
+                    break;
+                }
 
-                    const chatMap = this.newMessages.get(chat_id) || new Map();
-                    chatMap.set(id, message);
+                const chatMap = this.newMessages.get(chat_id) || new Map();
+                chatMap.set(id, message);
+                if (!this.windowFocused) {
                     this.newMessages.set(chat_id, chatMap);
                     this.updateTimer();
+                }
 
-                    if (!message.is_outgoing && !isMessageMuted(message) && this.enableSound) {
+                if (!message.is_outgoing && !isMessageMuted(message)) {
+                    console.log('notification', message)
+                    const text = message && message.content && message.content.text && message.content.text.text || (message.content && message.content['@type'] === "messageVoiceNote" ? '🎤 ' : '') + (message.content.caption.text || (message.content['@type'] === "messageVoiceNote" ? ' Voice' : ''));
+                    const sender = UserStore.get(message.sender_user_id).first_name
+                    new Notification(sender ? sender + ' says' : 'New message', { body: text || '' });
+
+                    if (this.enableSound && !this.windowFocused) {
                         const now = new Date();
                         if (now > this.nextSoundAt) {
                             try {
