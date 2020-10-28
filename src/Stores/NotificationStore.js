@@ -15,6 +15,14 @@ import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
 import { isChatMember, isMeChat } from '../Utils/Chat';
 
+const contentTypeMap = {
+    messagePhoto: { title: 'Photo', icon: '🌄' },
+    messageVoiceNote: { title: 'Voice', icon: '🎤' },
+    messageAudio: { title: 'Audio', icon: '🎵' },
+    messageDocument: { title: 'Document', icon: '📄' },
+    messageVideo: { title: 'Video', icon: '🎥' },
+}
+
 class NotificationStore extends EventEmitter {
     constructor() {
         super();
@@ -177,9 +185,10 @@ class NotificationStore extends EventEmitter {
 
                 if (!message.is_outgoing && !isMessageMuted(message)) {
                     console.log('notification', message)
-                    const text = message && message.content && message.content.text && message.content.text.text || (message.content && message.content['@type'] === "messageVoiceNote" ? '🎤 ' : '') + (message.content.caption.text || (message.content['@type'] === "messageVoiceNote" ? ' Voice' : ''));
+                    const text = message && message.content && message.content.text && message.content.text.text
+                    const text_ = text || (message.content && contentTypeMap[message.content['@type']].icon || '') + ' ' + (message.content.caption.text || contentTypeMap[message.content['@type']].title);
                     const sender = UserStore.get(message.sender_user_id).first_name
-                    new Notification(sender ? sender + ' says' : 'New message', { body: text || '', icon: 'https://telegram.org/img/t_logo.png' });
+                    new Notification(sender ? sender + (text ? ' says' : ' sends') : 'New message', { body: text_ || '', icon: 'https://telegram.org/img/t_logo.png' });
 
                     if (this.enableSound && !this.windowFocused) {
                         const now = new Date();
