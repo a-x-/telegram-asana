@@ -1,4 +1,9 @@
-# Telegram Web App
+# Telegram Web App w/ Integrated Task tracker and more — IDE for Managers on :fire:
+
+**[Details in Notion page (ru)](https://www.notion.so/thsm/IDE-91b81120fb364a4c81b7fcd7fc9dcb76)**
+
+----
+
 
 ### Interface
 ![Sample screenshot](/src/Assets/Screenshots/1x_Group.png)
