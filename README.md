@@ -5,8 +5,8 @@
 ----
 
 
-### Interface
-![Sample screenshot](/src/Assets/Screenshots/1x_Group.png)
+<img width="900" alt="Interface Screenshot 2020 Nov, 26" src="https://user-images.githubusercontent.com/6201068/100382809-2d80a800-302d-11eb-9f4f-43eed386cb8c.png">
+
 
 ### Technical details
 
