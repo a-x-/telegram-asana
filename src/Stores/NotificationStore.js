@@ -186,9 +186,12 @@ class NotificationStore extends EventEmitter {
                 if (!message.is_outgoing && !isMessageMuted(message)) {
                     console.log('notification', message)
                     const text = message && message.content && message.content.text && message.content.text.text
-                    const text_ = text || (message.content && contentTypeMap[message.content['@type']].icon || '') + ' ' + (message.content.caption.text || contentTypeMap[message.content['@type']].title);
-                    const sender = UserStore.get(message.sender_user_id).first_name
+                    const contentType = message.content && contentTypeMap[message.content['@type']]
+                    const text_ = text || (contentType && contentType.icon || '') + ' ' + (message.content.caption && message.content.caption.text || contentType && contentType.title || '');
+                    const senderObj = UserStore.get(message.sender_user_id)
+                    const sender = senderObj && senderObj.first_name
                     new Notification(sender ? sender + (text ? ' says' : ' sends') : 'New message', { body: text_ || '', icon: 'https://telegram.org/img/t_logo.png' });
+                    this.emit('updateNewMessage', update)
 
                     if (this.enableSound && !this.windowFocused) {
                         const now = new Date();

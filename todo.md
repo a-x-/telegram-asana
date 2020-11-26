@@ -8,8 +8,8 @@
   - [ ] кешировать лейаут (разобратся почему перегенерация this.messages приводит к полному re-mount'у)
   - [ ] fix: в DOM постоянно висит множество диалогов, съедающих много времени
 - [ ] typescript, css-modules
-- [ ] нотификации, беджики папок
-- [ ] TaskCard: esc, edit name, subtasks, comments, open animation
+- [x] нотификации, беджики папок
+- [ ] TaskCard: esc, edit name, subtasks, comments, open animation, rich text,
 
 
 ### fixes

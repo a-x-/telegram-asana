@@ -13,6 +13,7 @@ import Animator from '../../Utils/Animatior';
 import { clamp, getFirstLetter, throttle } from '../../Utils/Common';
 import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
+import ChatStore from '../../Stores/ChatStore';
 import FilterStore from '../../Stores/FilterStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -44,12 +45,11 @@ class Filters extends React.Component {
         AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
         FilterStore.on('clientUpdateChatList', this.onClientUpdateChatList);
         FilterStore.on('updateChatFilters', this.onUpdateChatFilters);
+        ChatStore.on('updateUnreadChatCount', this.onUpdateUnreadChatCount);
+        ChatStore.on('updateChatReadInbox', this.onUpdateChatReadInbox);
         LocalizationStore.on('clientUpdateLanguageChange', this.onClientUpdateLanguageChange);
 
         this.setSelection();
-        setTimeout(() => {
-            this.state.filters && this.state.filters[0] && this.state.filters[0].id && this.handleFilterClick(null, this.state.filters[0].id); // Select first folder
-        }, 300)
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -181,6 +181,9 @@ class Filters extends React.Component {
         }
     };
 
+    onUpdateUnreadChatCount = () => this.forceUpdate();
+    onUpdateChatReadInbox = () => this.forceUpdate();
+
     onUpdateChatFilters = update => {
         const { chatList } = this.state;
         const { filters } = FilterStore;
@@ -238,6 +241,19 @@ class Filters extends React.Component {
         event.stopPropagation();
     };
 
+    // todo: cache it!
+    getFilterUnreadCount = filterId => {
+        const filterChats = [...ChatStore.items.values()]
+            .filter(item => item.positions.find(pos => pos.list.chat_filter_id === filterId));
+        const mentions = filterChats
+            .reduce((res, item) => res + Boolean(item.unread_mention_count), 0)
+
+        const unread = filterChats
+            .reduce((res, item) => res + Boolean(item.unread_count), 0)
+        return { hasMentions: Boolean(mentions), count: unread }
+    };
+
+
     render() {
         const { t } = this.props;
         const { filters, chatList, isSmallWidth } = this.state;
@@ -248,22 +264,26 @@ class Filters extends React.Component {
         this.filterRef = new Map();
         return (
             <div ref={this.filtersRef} className='filters' onWheel={this.handleWheel}>
-                {filters.map(x => (
                     <div
+                        ref={r => this.filterRef.set('chatListMain', r)}
+                        className={classNames('filter', { 'item-selected': chatList['@type'] === 'chatListMain'})}
+                        onMouseDown={this.handleMainClick}
+                        title={isSmallWidth ? t('FilterAllChats') : null}>
+                        <span>All</span>
+                    </div>
+                    {filters.map(x => {
+                    const { count, hasMentions } = this.getFilterUnreadCount(x.id)
+                    return <div
                         key={x.id}
                         ref={r => this.filterRef.set('chatListFilter_id=' + x.id, r)}
                         className={classNames('filter', { 'item-selected': chatList.chat_filter_id === x.id})}
                         onMouseDown={e => this.handleFilterClick(e, x.id)}
                         title={isSmallWidth ? x.title : null}>
                         <span>{isSmallWidth ? getFirstLetter(x.title) : x.title}</span>
-                    </div>))}
-                    <div
-                        ref={r => this.filterRef.set('chatListMain', r)}
-                        className={classNames('filter', { 'item-selected': chatList['@type'] === 'chatListMain'})}
-                        onMouseDown={this.handleMainClick}
-                        title={isSmallWidth ? t('FilterAllChats') : null}>
-                        <span>{isSmallWidth ? getFirstLetter(t('FilterAllChats')) : t('FilterAllChats')}</span>
-                    </div>
+                        {Boolean(count) &&
+                            <span className={classNames("filter-badge", {'filter-badge-with-mentions': hasMentions})}>{count > 99 ? '∞' : count}</span>
+                        }
+                    </div>})}
                 <div ref={this.filterSelectionRef} className='filter-selection'/>
             </div>
         );
